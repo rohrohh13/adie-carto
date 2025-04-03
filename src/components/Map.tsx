@@ -53,33 +53,49 @@ const [communesData, setCommunesData] = useState<GeoJSON.GeoJsonObject | null>(n
   const [financeFilter, setFinanceFilter] = useState(false);
   const [contactFilter, setContactFilter] = useState(false);
 
-  useEffect(() => {
-    // Charger les données géographiques
-    fetch("/departements-ori.geojson")
-      .then((response) => response.json())
-      .then((data) => setDepartementsData(data));
+useEffect(() => {
+  // Charger les données géographiques
+  fetch("/departements-ori.geojson")
+    .then((response) => response.json())
+    .then((data) => setDepartementsData(data))
+    .catch((error) => console.error("Erreur lors du chargement des départements:", error));
 
-    fetch("/epci.geojson")
-      .then((response) => response.json())
-      .then((data) => setEpciData(data));
+  fetch("/epci.geojson")
+    .then((response) => response.json())
+    .then((data) => setEpciData(data))
+    .catch((error) => console.error("Erreur lors du chargement des EPCI:", error));
 
-    fetch("/communes.geojson")
-      .then((response) => response.json())
-      .then((data) => setCommunesData(data));
+  fetch("/communes.geojson")
+    .then((response) => response.json())
+    .then((data) => setCommunesData(data))
+    .catch((error) => console.error("Erreur lors du chargement des communes:", error));
 
-    // Charger les données des élus
-    fetch("https://opensheet.elk.sh/1h7b8migggCOfZPKuH_uF14hLkL7LSDP3JyBQWIsHEUo/Feuille%201")
-      .then((response) => response.json())
-      .then((data) => setElusData((prev) => ({ ...prev, epci: data })));
+  // Charger les données des élus
+  fetch("https://opensheet.elk.sh/1h7b8migggCOfZPKuH_uF14hLkL7LSDP3JyBQWIsHEUo/Feuille%201")
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("Données des élus EPCI:", data);
+      setElusData((prev) => ({ ...prev, epci: data }));
+    })
+    .catch((error) => console.error("Erreur lors du chargement des élus EPCI:", error));
 
-    fetch("https://opensheet.elk.sh/1MH9fBSOkJ0gLKtakq5pt-eK93XeA_hUGm5i2Ydot3ic/Feuille%201")
-      .then((response) => response.json())
-      .then((data) => setElusData((prev) => ({ ...prev, communes: data })));
+  fetch("https://opensheet.elk.sh/1MH9fBSOkJ0gLKtakq5pt-eK93XeA_hUGm5i2Ydot3ic/Feuille%201")
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("Données des élus Communes:", data);
+      setElusData((prev) => ({ ...prev, communes: data }));
+    })
+    .catch((error) => console.error("Erreur lors du chargement des élus Communes:", error));
 
-    fetch("https://opensheet.elk.sh/1tztvQvsSmV667Y10Z_Zf9utevKAmOI3qCjpJ4kP5-uU/Feuille%201")
-      .then((response) => response.json())
-      .then((data) => setElusData((prev) => ({ ...prev, departements: data })));
-  }, []);
+  fetch("https://opensheet.elk.sh/1tztvQvsSmV667Y10Z_Zf9utevKAmOI3qCjpJ4kP5-uU/Feuille%201")
+    .then((response) => response.json())
+    .then((data) => {
+      console.log("Données des élus Départements:", data);
+      setElusData((prev) => ({ ...prev, departements: data }));
+    })
+    .catch((error) => console.error("Erreur lors du chargement des élus Départements:", error));
+}, []);
+
 
 const onEachFeature = (feature: Feature, layer: Layer) => {
   const properties = feature.properties;
