@@ -68,6 +68,7 @@ line-height: 120%;
 .headerDerawerUn {
   padding:40px 20px;
   padding-bottom: 20px;
+  width: 350px;
 }
 .headerDerawerUn h2 {
   margin: 0;
@@ -223,4 +224,10 @@ line-height: 120%;
   font-style: normal;
   font-weight: 500;
   line-height: normal;
+}
+
+
+
+.drawerElu {
+  width: 350px;
 }

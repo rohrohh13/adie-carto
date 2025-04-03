@@ -213,7 +213,6 @@ const onEachFeature = (feature: Feature, layer: Layer) => {
           zIndex: 1000,
           display: "flex",
           flexDirection: "column",
-          gap: 10,
         }}
       >
         <Box display="flex" alignItems="center">
@@ -298,7 +297,7 @@ const onEachFeature = (feature: Feature, layer: Layer) => {
         onClose={() => setOpenDrawer(false)}
         sx={{ width: 355 }}
       >
-        <div style={{ padding: "16px", position: "relative" }} className="headerDerawerUn">
+        <div style={{ position: "relative" }} className="headerDerawerUn">
           {/* Bouton de fermeture */}
           <IconButton
             edge="start"
@@ -369,109 +368,109 @@ const onEachFeature = (feature: Feature, layer: Layer) => {
               />
               <h3>Élus</h3>
             </div>
-{scale === 0 && (
-  <>
-    {/* Séparer les élus ayant une fonction et ceux n'en ayant pas */}
-    {elusData.departements
-      .sort((a, b) => {
-        const hasFunctionA = a["Libellé de la fonction"];
-        const hasFunctionB = b["Libellé de la fonction"];
-        if (hasFunctionA && !hasFunctionB) return -1;
-        if (!hasFunctionA && hasFunctionB) return 1;
-        return 0;
-      })
-      .map((elu, index: number) => (
-        <div
-          key={index}
-          onClick={() => handleEluClick(elu)}
-          style={{ cursor: "pointer" }}
-          className="drawerUnGroupeBlocDepute"
-        >
-          <div className="drawerUnGroupeBlocDeputeFlex">
-            <div className="drawerUnGroupeBlocDeputeFlexDeux">
-              <div>
-                <h4>{elu["Nom"] || ""} {elu["Prénom"] || ""}</h4>
-                <p>{elu["Libellé de la fonction"] || ""}</p>
-              </div>
-            </div>
-            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M5.625 2.8125L10.3125 7.5L5.625 12.1875" stroke="black" stroke-width="0.9375" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-        </div>
-      ))}
-  </>
-)}
+            {scale === 0 && (
+              <>
+                {/* Séparer les élus ayant une fonction et ceux n'en ayant pas */}
+                {elusData.departements
+                  .sort((a, b) => {
+                    const hasFunctionA = a["Libellé de la fonction"];
+                    const hasFunctionB = b["Libellé de la fonction"];
+                    if (hasFunctionA && !hasFunctionB) return -1;
+                    if (!hasFunctionA && hasFunctionB) return 1;
+                    return 0;
+                  })
+                  .map((elu, index: number) => (
+                    <div
+                      key={index}
+                      onClick={() => handleEluClick(elu)}
+                      style={{ cursor: "pointer" }}
+                      className="drawerUnGroupeBlocDepute"
+                    >
+                      <div className="drawerUnGroupeBlocDeputeFlex">
+                        <div className="drawerUnGroupeBlocDeputeFlexDeux">
+                          <div>
+                            <h4>{elu["Nom"] || ""} {elu["Prénom"] || ""}</h4>
+                            <p>{elu["Libellé de la fonction"] || ""}</p>
+                          </div>
+                        </div>
+                        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M5.625 2.8125L10.3125 7.5L5.625 12.1875" stroke="black" stroke-width="0.9375" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </div>
+                    </div>
+                  ))}
+              </>
+            )}
 
-{scale === 1 && selectedDepartment && selectedDepartment.elus && selectedDepartment.elus.length > 0 && (
-  <>
-    {selectedDepartment.elus
-      .sort((a, b) => {
-        const hasFunctionA = a["Libellé de la fonction"];
-        const hasFunctionB = b["Libellé de la fonction"];
-        if (hasFunctionA && !hasFunctionB) return -1;
-        if (!hasFunctionA && hasFunctionB) return 1;
-        const functionA = a["Libellé de la fonction"] || "";
-        const functionB = b["Libellé de la fonction"] || "";
-        return functionA.localeCompare(functionB);
-      })
-      .map((elu, index: number) => (
-        <div
-          key={index}
-          onClick={() => handleEluClick(elu)}
-          style={{ cursor: "pointer" }}
-          className="drawerUnGroupeBlocDepute"
-        >
-          <div className="drawerUnGroupeBlocDeputeFlex">
-            <div className="drawerUnGroupeBlocDeputeFlexDeux">
-              <div>
-                <h4>{elu.Nom} {elu.Prénom}</h4>
-                <p>{elu["Libellé de la fonction"] || ""}</p>
-              </div>
-            </div>
-            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M5.625 2.8125L10.3125 7.5L5.625 12.1875" stroke="black" stroke-width="0.9375" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-        </div>
-      ))}
-  </>
-)}
+            {scale === 1 && selectedDepartment && selectedDepartment.elus && selectedDepartment.elus.length > 0 && (
+              <>
+                {selectedDepartment.elus
+                  .sort((a, b) => {
+                    const hasFunctionA = a["Libellé de la fonction"];
+                    const hasFunctionB = b["Libellé de la fonction"];
+                    if (hasFunctionA && !hasFunctionB) return -1;
+                    if (!hasFunctionA && hasFunctionB) return 1;
+                    const functionA = a["Libellé de la fonction"] || "";
+                    const functionB = b["Libellé de la fonction"] || "";
+                    return functionA.localeCompare(functionB);
+                  })
+                  .map((elu, index: number) => (
+                    <div
+                      key={index}
+                      onClick={() => handleEluClick(elu)}
+                      style={{ cursor: "pointer" }}
+                      className="drawerUnGroupeBlocDepute"
+                    >
+                      <div className="drawerUnGroupeBlocDeputeFlex">
+                        <div className="drawerUnGroupeBlocDeputeFlexDeux">
+                          <div>
+                            <h4>{elu.Nom} {elu.Prénom}</h4>
+                            <p>{elu["Libellé de la fonction"] || ""}</p>
+                          </div>
+                        </div>
+                        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M5.625 2.8125L10.3125 7.5L5.625 12.1875" stroke="black" stroke-width="0.9375" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </div>
+                    </div>
+                  ))}
+              </>
+            )}
 
-{scale === 2 && selectedDepartment && selectedDepartment.elus && selectedDepartment.elus.length > 0 && (
-  <>
-    {selectedDepartment.elus
-      .sort((a, b) => {
-        const hasFunctionA = a["Libellé de la fonction"];
-        const hasFunctionB = b["Libellé de la fonction"];
-        if (hasFunctionA && !hasFunctionB) return -1;
-        if (!hasFunctionA && hasFunctionB) return 1;
-        const functionA = a["Libellé de la fonction"] || "";
-        const functionB = b["Libellé de la fonction"] || "";
-        return functionA.localeCompare(functionB);
-      })
-      .map((elu, index: number) => (
-        <div
-          key={index}
-          onClick={() => handleEluClick(elu)}
-          style={{ cursor: "pointer" }}
-          className="drawerUnGroupeBlocDepute"
-        >
-          <div className="drawerUnGroupeBlocDeputeFlex">
-            <div className="drawerUnGroupeBlocDeputeFlexDeux">
-              <div>
-                <h4>{elu.Nom} {elu.Prénom}</h4>
-                <p>{elu["Libellé de la fonction"] || ""}</p>
-              </div>
-            </div>
-            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M5.625 2.8125L10.3125 7.5L5.625 12.1875" stroke="black" stroke-width="0.9375" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-        </div>
-      ))}
-  </>
-)}
+            {scale === 2 && selectedDepartment && selectedDepartment.elus && selectedDepartment.elus.length > 0 && (
+              <>
+                {selectedDepartment.elus
+                  .sort((a, b) => {
+                    const hasFunctionA = a["Libellé de la fonction"];
+                    const hasFunctionB = b["Libellé de la fonction"];
+                    if (hasFunctionA && !hasFunctionB) return -1;
+                    if (!hasFunctionA && hasFunctionB) return 1;
+                    const functionA = a["Libellé de la fonction"] || "";
+                    const functionB = b["Libellé de la fonction"] || "";
+                    return functionA.localeCompare(functionB);
+                  })
+                  .map((elu, index: number) => (
+                    <div
+                      key={index}
+                      onClick={() => handleEluClick(elu)}
+                      style={{ cursor: "pointer" }}
+                      className="drawerUnGroupeBlocDepute"
+                    >
+                      <div className="drawerUnGroupeBlocDeputeFlex">
+                        <div className="drawerUnGroupeBlocDeputeFlexDeux">
+                          <div>
+                            <h4>{elu.Nom} {elu.Prénom}</h4>
+                            <p>{elu["Libellé de la fonction"] || ""}</p>
+                          </div>
+                        </div>
+                        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M5.625 2.8125L10.3125 7.5L5.625 12.1875" stroke="black" stroke-width="0.9375" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                      </div>
+                    </div>
+                  ))}
+              </>
+            )}
 
 
           </div>
@@ -485,7 +484,7 @@ const onEachFeature = (feature: Feature, layer: Layer) => {
         onClose={() => setOpenEluDrawer(false)}
         sx={{ width: 350 }}
       >
-        <div style={{ padding: "16px", position: "relative" }}>
+        <div className="drawerElu" style={{ padding: "16px", position: "relative" }}>
           {/* Bouton de fermeture */}
           <IconButton
             edge="start"
