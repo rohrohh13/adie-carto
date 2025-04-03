@@ -531,23 +531,23 @@ const onEachFeature = (feature: Feature, layer: Layer) => {
               <p>Délégation : {selectedElu["Délégation"]}</p>
             )}
           </div>
-          <div>
-            <div>
+          <div className="lesInfosDuDepute">
+
               {selectedElu?.["Date de naissance"] ? (
                 (() => {
                   const birthDateStr = selectedElu["Date de naissance"];
                   const birthDate = parseDate(birthDateStr);
                   if (isNaN(birthDate.getTime())) {
-                    return <div>Âge non disponible (date invalide)</div>;
+                    return <p>Âge non disponible (date invalide)</p>;
                   }
-                  return <div>Age : {calculateAge(birthDate)} ans</div>;
+                  return <p>Age : <span>{calculateAge(birthDate)} ans</span></p>;
                 })()
               ) : (
-                <div>Âge non disponible (date manquante)</div>
+                <p>Âge non disponible (date manquante)</p>
               )}
-            </div>
-            <div>CSP : {selectedElu?.["Libellé de la catégorie socio-professionnelle"]}</div>
-            <div>Date de début du mandat : {selectedElu?.["Date de début du mandat"]}</div>
+
+            <p>CSP : <span>{selectedElu?.["Libellé de la catégorie socio-professionnelle"]}</span></p>
+            <p>Date de début du mandat : <span>{selectedElu?.["Date de début du mandat"]}</span></p>
           </div>
         </div>
       </Drawer>
