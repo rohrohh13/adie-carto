@@ -288,7 +288,7 @@ const onEachFeature = (feature: Feature, layer: Layer) => {
           <span>Map</span>
         </div>
         <div className="footerDeux">
-          <span>Cibler, trier et récupérer vos contacts test</span>
+          <span>Cibler, trier et récupérer vos contacts</span>
         </div>
       </div>
       {/* Drawer avec les informations du département */}
