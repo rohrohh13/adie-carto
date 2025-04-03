@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import Slider from "@mui/material/Slider";
+import { Feature } from 'geojson';
+import { Layer } from 'leaflet';
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Drawer from "@mui/material/Drawer";
@@ -10,18 +12,43 @@ import LanguageIcon from "@mui/icons-material/Language";
 import IconButton from "@mui/material/IconButton";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import CloseIcon from "@mui/icons-material/Close";
-import { Link, Switch } from "@mui/material";
+import { Switch } from "@mui/material";
+
+interface Department {
+  nom?: string;
+  population?: number;
+  lieu?: string;
+  lieu_deux?: string;
+  lieu_trois?: string;
+  lieu_quatre?: string;
+  telephone?: string;
+  site_web?: string;
+  email?: string;
+  elus?: Elu[];
+}
+
+interface Elu {
+  Nom: string;
+  Prénom: string;
+  "Libellé de la fonction"?: string;
+  "Délégation"?: string;
+  "Date de naissance"?: string;
+  "Libellé de la catégorie socio-professionnelle"?: string;
+  "Date de début du mandat"?: string;
+}
+
 
 const Map = () => {
-  const position = [43.6, 3.25];
-  const [departementsData, setDepartementsData] = useState(null);
-  const [epciData, setEpciData] = useState(null);
-  const [communesData, setCommunesData] = useState(null);
+  const position: [number, number] = [43.6, 3.25];
+const [departementsData, setDepartementsData] = useState<GeoJSON.GeoJsonObject | null>(null);
+const [epciData, setEpciData] = useState<GeoJSON.GeoJsonObject | null>(null);
+const [communesData, setCommunesData] = useState<GeoJSON.GeoJsonObject | null>(null);
+
   const [scale, setScale] = useState(0); // 0 = Départements, 1 = EPCI, 2 = Communes
   const [openDrawer, setOpenDrawer] = useState(false); // État pour contrôler l'ouverture du Drawer
-  const [selectedDepartment, setSelectedDepartment] = useState(null); // Département sélectionné
+  const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null);
   const [elusData, setElusData] = useState({ departements: [], epci: [], communes: [] }); // Données des élus
-  const [selectedElu, setSelectedElu] = useState(null); // Élu sélectionné
+  const [selectedElu, setSelectedElu] = useState<Elu | null>(null);
   const [openEluDrawer, setOpenEluDrawer] = useState(false); // État pour contrôler l'ouverture du Drawer des élus
   const [financeFilter, setFinanceFilter] = useState(false);
   const [contactFilter, setContactFilter] = useState(false);
@@ -54,34 +81,40 @@ const Map = () => {
       .then((data) => setElusData((prev) => ({ ...prev, departements: data })));
   }, []);
 
-  const onEachFeature = (feature, layer) => {
-    const label = feature.properties?.NOM || feature.properties?.nom || feature.properties?.NOM_M;
-    if (label) {
-      layer.bindTooltip(label, { permanent: false, direction: "top" });
+const onEachFeature = (feature: Feature, layer: Layer) => {
+  const properties = feature.properties;
+  if (!properties) {
+    return;
+  }
+
+  const label = properties.NOM || properties.nom || properties.NOM_M;
+  if (label) {
+    layer.bindTooltip(label, { permanent: false, direction: "top" });
+  }
+
+  layer.on("click", () => {
+    if (scale === 0) {
+      // Départements
+      setSelectedDepartment(properties);
+      setOpenDrawer(true);
+    } else if (scale === 1) {
+      // EPCI : correspondance avec Numero SIREN
+      const siren = properties.code;
+      const elusEpci = elusData.epci.filter(elu => String(elu["Siren"]) === String(siren));
+      setSelectedDepartment({ ...properties, elus: elusEpci });
+      setOpenDrawer(true);
+    } else if (scale === 2) {
+      // Communes : correspondance avec Code commune
+      const inseeCom = properties.INSEE_COM;
+      const elusCommune = elusData.communes.filter(elu => String(elu["Code commune"]) === String(inseeCom));
+      setSelectedDepartment({ ...properties, elus: elusCommune });
+      setOpenDrawer(true);
     }
+  });
+};
 
-    layer.on("click", () => {
-      if (scale === 0) {
-        // Départements
-        setSelectedDepartment(feature.properties);
-        setOpenDrawer(true);
-      } else if (scale === 1) {
-        // EPCI : correspondance avec Numero SIREN
-        const siren = feature.properties.code;
-        const elusEpci = elusData.epci.filter(elu => String(elu["Siren"]) === String(siren));
-        setSelectedDepartment({ ...feature.properties, elus: elusEpci });
-        setOpenDrawer(true);
-      } else if (scale === 2) {
-        // Communes : correspondance avec Code commune
-        const inseeCom = feature.properties.INSEE_COM;
-        const elusCommune = elusData.communes.filter(elu => String(elu["Code commune"]) === String(inseeCom));
-        setSelectedDepartment({ ...feature.properties, elus: elusCommune });
-        setOpenDrawer(true);
-      }
-    });
-  };
 
-  const getColor = (feature) => {
+  const getColor = (feature: any) => {
     // Vérifier que les propriétés existent pour chaque type de géodonnée
     console.log("Feature properties:", feature.properties);
 
@@ -96,7 +129,7 @@ const Map = () => {
   };
 
   // Fonction pour reformater la date
-  function parseDate(dateStr) {
+  function parseDate(dateStr: any) {
     const parts = dateStr.split("/");  // Sépare la date par "/"
     if (parts.length === 3) {
       // Reformate la date en "YYYY-MM-DD"
@@ -106,7 +139,7 @@ const Map = () => {
   }
 
   // Fonction pour calculer l'âge
-  const calculateAge = (birthDate) => {
+  const calculateAge = (birthDate: any) => {
     const birth = new Date(birthDate);
     const today = new Date();
     let age = today.getFullYear() - birth.getFullYear();
@@ -121,7 +154,7 @@ const Map = () => {
     return age;
   };
 
-  const handleEluClick = (elu) => {
+  const handleEluClick = (elu: any) => {
     setSelectedElu(elu);
     setOpenEluDrawer(true);
   };
@@ -169,7 +202,7 @@ const Map = () => {
               backgroundColor: "gray",
             },
           }}
-          onChange={(event, newValue) => setScale(newValue as number)}
+          onChange={(_, newValue) => setScale(newValue as number)}
         />
       </Box>
       <Box
@@ -206,8 +239,9 @@ const Map = () => {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
+
         <GeoJSON
-          data={departementsData}
+          data={departementsData!}
           style={(feature) => ({ color: getColor(feature), weight: 1 })}
           onEachFeature={onEachFeature}
         />
@@ -279,7 +313,7 @@ const Map = () => {
           <h2 className="drawerListeTitle">
             {scale === 0 && (selectedDepartment?.nom || "Département non renseigné")}
             {scale === 1 && (selectedDepartment?.nom || "EPCI non renseigné")}
-            {scale === 2 && (selectedDepartment?.NOM || "Commune non renseignée")}
+            {scale === 2 && (selectedDepartment?.nom || "Commune non renseignée")}
           </h2>
           <p className="drawerListeNumber">{selectedDepartment?.population} habitants</p>
           {(selectedDepartment?.lieu || selectedDepartment?.lieu_deux || selectedDepartment?.lieu_trois || selectedDepartment?.lieu_quatre) && (
@@ -335,119 +369,111 @@ const Map = () => {
               />
               <h3>Élus</h3>
             </div>
-            {scale === 0 && (
-              <>
-                {/* Séparer les élus ayant une fonction et ceux n'en ayant pas */}
-                {elusData.departements
-                  .sort((a, b) => {
-                    // Trier d'abord ceux qui ont une fonction renseignée
-                    const hasFunctionA = a["Libellé de la fonction"];
-                    const hasFunctionB = b["Libellé de la fonction"];
-                    // Ceux avec une fonction d'abord
-                    if (hasFunctionA && !hasFunctionB) return -1; // A avant B
-                    if (!hasFunctionA && hasFunctionB) return 1; // B avant A
-                    return 0; // Ils sont égaux, on ne change pas l'ordre
-                  })
-                  .map((elu, index) => (
-                    <div
-                      key={index}
-                      onClick={() => handleEluClick(elu)}
-                      style={{ cursor: "pointer" }}
-                      className="drawerUnGroupeBlocDepute"
-                    >
-                      <div className="drawerUnGroupeBlocDeputeFlex">
-                        <div className="drawerUnGroupeBlocDeputeFlexDeux">
-                          <div>
-                            <h4>{elu.Nom} {elu.Prénom}</h4>
-                            <p>{elu["Libellé de la fonction"] || ""}</p>
-                          </div>
-                        </div>
-                        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M5.625 2.8125L10.3125 7.5L5.625 12.1875" stroke="black" stroke-width="0.9375" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                      </div>
-                    </div>
-                  ))}
-              </>
-            )}
+{scale === 0 && (
+  <>
+    {/* Séparer les élus ayant une fonction et ceux n'en ayant pas */}
+    {elusData.departements
+      .sort((a, b) => {
+        const hasFunctionA = a["Libellé de la fonction"];
+        const hasFunctionB = b["Libellé de la fonction"];
+        if (hasFunctionA && !hasFunctionB) return -1;
+        if (!hasFunctionA && hasFunctionB) return 1;
+        return 0;
+      })
+      .map((elu, index: number) => (
+        <div
+          key={index}
+          onClick={() => handleEluClick(elu)}
+          style={{ cursor: "pointer" }}
+          className="drawerUnGroupeBlocDepute"
+        >
+          <div className="drawerUnGroupeBlocDeputeFlex">
+            <div className="drawerUnGroupeBlocDeputeFlexDeux">
+              <div>
+                <h4>{elu["Nom"] || ""} {elu["Prénom"] || ""}</h4>
+                <p>{elu["Libellé de la fonction"] || ""}</p>
+              </div>
+            </div>
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5.625 2.8125L10.3125 7.5L5.625 12.1875" stroke="black" stroke-width="0.9375" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+      ))}
+  </>
+)}
 
-            {scale === 1 && selectedDepartment?.elus?.length > 0 && (
-              <>
-                {/* Séparer les élus ayant une fonction et ceux n'en ayant pas */}
-                {selectedDepartment.elus
-                  .sort((a, b) => {
-                    // Trier d'abord ceux qui ont une fonction renseignée
-                    const hasFunctionA = a["Libellé de la fonction"];
-                    const hasFunctionB = b["Libellé de la fonction"];
-                    // Ceux avec une fonction d'abord
-                    if (hasFunctionA && !hasFunctionB) return -1; // A avant B
-                    if (!hasFunctionA && hasFunctionB) return 1; // B avant A
-                    // Ensuite, trier par la fonction (si nécessaire)
-                    const functionA = a["Libellé de la fonction"] || "";
-                    const functionB = b["Libellé de la fonction"] || "";
-                    return functionA.localeCompare(functionB); // Trier par ordre alphabétique des fonctions
-                  })
-                  .map((elu, index) => (
-                    <div
-                      key={index}
-                      onClick={() => handleEluClick(elu)}
-                      style={{ cursor: "pointer" }}
-                      className="drawerUnGroupeBlocDepute"
-                    >
-                      <div className="drawerUnGroupeBlocDeputeFlex">
-                        <div className="drawerUnGroupeBlocDeputeFlexDeux">
-                          <div>
-                            <h4>{elu.Nom} {elu.Prénom}</h4>
-                            <p>{elu["Libellé de la fonction"] || ""}</p>
-                          </div>
-                        </div>
-                        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M5.625 2.8125L10.3125 7.5L5.625 12.1875" stroke="black" stroke-width="0.9375" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                      </div>
-                    </div>
-                  ))}
-              </>
-            )}
+{scale === 1 && selectedDepartment && selectedDepartment.elus && selectedDepartment.elus.length > 0 && (
+  <>
+    {selectedDepartment.elus
+      .sort((a, b) => {
+        const hasFunctionA = a["Libellé de la fonction"];
+        const hasFunctionB = b["Libellé de la fonction"];
+        if (hasFunctionA && !hasFunctionB) return -1;
+        if (!hasFunctionA && hasFunctionB) return 1;
+        const functionA = a["Libellé de la fonction"] || "";
+        const functionB = b["Libellé de la fonction"] || "";
+        return functionA.localeCompare(functionB);
+      })
+      .map((elu, index: number) => (
+        <div
+          key={index}
+          onClick={() => handleEluClick(elu)}
+          style={{ cursor: "pointer" }}
+          className="drawerUnGroupeBlocDepute"
+        >
+          <div className="drawerUnGroupeBlocDeputeFlex">
+            <div className="drawerUnGroupeBlocDeputeFlexDeux">
+              <div>
+                <h4>{elu.Nom} {elu.Prénom}</h4>
+                <p>{elu["Libellé de la fonction"] || ""}</p>
+              </div>
+            </div>
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5.625 2.8125L10.3125 7.5L5.625 12.1875" stroke="black" stroke-width="0.9375" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+      ))}
+  </>
+)}
 
-            {scale === 2 && selectedDepartment?.elus?.length > 0 && (
-              <>
-                {/* Séparer les élus ayant une fonction et ceux n'en ayant pas */}
-                {selectedDepartment?.elus
-                  .sort((a, b) => {
-                    // Trier d'abord ceux qui ont une fonction renseignée
-                    const hasFunctionA = a["Libellé de la fonction"];
-                    const hasFunctionB = b["Libellé de la fonction"];
-                    // Ceux avec une fonction d'abord
-                    if (hasFunctionA && !hasFunctionB) return -1; // A avant B
-                    if (!hasFunctionA && hasFunctionB) return 1; // B avant A
-                    // Ensuite, trier par la fonction (si nécessaire)
-                    const functionA = a["Libellé de la fonction"] || "";
-                    const functionB = b["Libellé de la fonction"] || "";
-                    return functionA.localeCompare(functionB); // Trier par ordre alphabétique des fonctions
-                  })
-                  .map((elu, index) => (
-                    <div
-                      key={index}
-                      onClick={() => handleEluClick(elu)}
-                      style={{ cursor: "pointer" }}
-                      className="drawerUnGroupeBlocDepute"
-                    >
-                      <div className="drawerUnGroupeBlocDeputeFlex">
-                        <div className="drawerUnGroupeBlocDeputeFlexDeux">
-                          <div>
-                            <h4>{elu.Nom} {elu.Prénom}</h4>
-                            <p>{elu["Libellé de la fonction"] || ""}</p>
-                          </div>
-                        </div>
-                        <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M5.625 2.8125L10.3125 7.5L5.625 12.1875" stroke="black" stroke-width="0.9375" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                      </div>
-                    </div>
-                  ))}
-              </>
-            )}
+{scale === 2 && selectedDepartment && selectedDepartment.elus && selectedDepartment.elus.length > 0 && (
+  <>
+    {selectedDepartment.elus
+      .sort((a, b) => {
+        const hasFunctionA = a["Libellé de la fonction"];
+        const hasFunctionB = b["Libellé de la fonction"];
+        if (hasFunctionA && !hasFunctionB) return -1;
+        if (!hasFunctionA && hasFunctionB) return 1;
+        const functionA = a["Libellé de la fonction"] || "";
+        const functionB = b["Libellé de la fonction"] || "";
+        return functionA.localeCompare(functionB);
+      })
+      .map((elu, index: number) => (
+        <div
+          key={index}
+          onClick={() => handleEluClick(elu)}
+          style={{ cursor: "pointer" }}
+          className="drawerUnGroupeBlocDepute"
+        >
+          <div className="drawerUnGroupeBlocDeputeFlex">
+            <div className="drawerUnGroupeBlocDeputeFlexDeux">
+              <div>
+                <h4>{elu.Nom} {elu.Prénom}</h4>
+                <p>{elu["Libellé de la fonction"] || ""}</p>
+              </div>
+            </div>
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M5.625 2.8125L10.3125 7.5L5.625 12.1875" stroke="black" stroke-width="0.9375" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+        </div>
+      ))}
+  </>
+)}
+
+
           </div>
         </div>
       </Drawer>
@@ -489,7 +515,7 @@ const Map = () => {
                 selectedDepartment?.nom || "EPCI non renseigné"
               ) : scale === 2 ? (
                 // Affichage pour la commune
-                selectedDepartment?.NOM || "Commune non renseignée"
+                selectedDepartment?.nom || "Commune non renseignée"
               ) : (
                 "Pas de donnée disponible pour cet échelon"
               )}
